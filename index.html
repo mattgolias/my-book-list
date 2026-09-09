@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#211d16;
+    --paper:#f3ecda;
+    --paper-dim:#e9e0c8;
+    --green:#1b3327;
+    --green-deep:#12241c;
+    --wood:#6b4a32;
+    --gold:#c08a3e;
+    --rust:#a34632;
+    --line: rgba(33,29,22,0.16);
+    --shadow: 0 12px 26px rgba(10,16,12,0.28);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--green);
+    background-image:
+      radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 60%);
+    color: var(--paper);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;}
+  ::selection{ background: var(--gold); color: var(--ink); }
+  :focus-visible{ outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  .wrap{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 28px 100px;
+  }
+
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    margin-bottom: 44px;
+    border-bottom: 1px solid rgba(243,236,218,0.18);
+    padding-bottom: 28px;
+  }
+
+  header .title-block h1{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size: clamp(2.2rem, 5vw, 3.1rem);
+    margin: 0 0 6px;
+    letter-spacing:-0.01em;
+  }
+
+  header p.sub{
+    margin:0;
+    color: rgba(243,236,218,0.62);
+    font-size:0.98rem;
+    max-width:38ch;
+  }
+
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+
+  .user-email{
+    font-size:0.82rem;
+    color: rgba(243,236,218,0.5);
+  }
+
+  .btn{
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    border:none;
+    cursor:pointer;
+    border-radius:3px;
+    padding:12px 20px;
+    transition: transform 0.12s ease, background 0.15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  @media (prefers-reduced-motion: reduce){ .btn{ transition:none; } }
+
+  .btn-primary{ background: var(--gold); color: var(--green-deep); }
+  .btn-primary:hover{ background:#d29c4d; }
+  .btn-primary:disabled{ opacity:0.6; cursor:default; }
+
+  .btn-ghost{
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid rgba(243,236,218,0.35);
+  }
+  .btn-ghost:hover{ border-color: var(--gold); color: var(--gold); }
+
+  .btn-text{
+    background:none; border:none;
+    color: rgba(243,236,218,0.6);
+    font-family:'Work Sans', sans-serif;
+    cursor:pointer;
+    font-size:0.88rem;
+    padding:4px;
+  }
+  .btn-text:hover{ color: var(--paper); }
+
+  .shelf-row{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 28px 22px;
+    padding-bottom: 22px;
+    margin-bottom: 26px;
+    border-bottom: 10px solid var(--wood);
+    box-shadow: 0 8px 10px -6px rgba(0,0,0,0.35);
+    position:relative;
+  }
+  .shelf-row::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:-10px;
+    height:10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.25), transparent);
+  }
+
+  .book-card{
+    background:none; border:none; padding:0;
+    text-align:left; cursor:pointer;
+    color:inherit; font-family:inherit;
+  }
+
+  .cover{
+    position:relative;
+    aspect-ratio: 2 / 3;
+    border-radius: 2px;
+    overflow:hidden;
+    box-shadow: var(--shadow);
+    background: var(--paper-dim);
+    transform-origin:bottom center;
+    transition: transform 0.16s ease;
+  }
+  .book-card:hover .cover{ transform: translateY(-6px); }
+  @media (prefers-reduced-motion: reduce){
+    .cover{ transition:none; }
+    .book-card:hover .cover{ transform:none; }
+  }
+
+  .cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .cover-placeholder{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    padding: 14px;
+  }
+  .cover-placeholder span{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:1rem;
+    line-height:1.25;
+    text-align:center;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  .ribbon{
+    position:absolute; left:14px; right:14px; bottom:0;
+    background: var(--gold); color: var(--green-deep);
+    font-size:0.72rem; font-weight:600;
+    padding:5px 8px 6px;
+    border-radius: 2px 2px 0 0;
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.2);
+  }
+  .ribbon .prog{
+    margin-top:4px; height:3px;
+    background: rgba(18,36,28,0.25);
+    border-radius:2px; overflow:hidden;
+  }
+  .ribbon .prog i{ display:block; height:100%; background: var(--green-deep); }
+
+  .book-title{
+    margin:12px 2px 0;
+    font-family:'Fraunces', serif;
+    font-weight:500; font-size:0.98rem; line-height:1.3;
+  }
+  .book-chapter{ margin:3px 2px 0; font-size:0.82rem; color: rgba(243,236,218,0.58); }
+
+  .empty{ text-align:center; padding: 70px 20px 40px; }
+  .empty svg{ opacity:0.5; margin-bottom:18px; }
+  .empty h2{
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:1.5rem; margin:0 0 8px;
+  }
+  .empty p{ color: rgba(243,236,218,0.6); margin:0 0 22px; }
+
+  .overlay{
+    position:fixed; inset:0;
+    background: rgba(10,16,12,0.6);
+    backdrop-filter: blur(2px);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:50;
+  }
+
+  .card-form{
+    width:100%; max-width: 440px;
+    background: var(--paper); color: var(--ink);
+    border-radius: 4px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+    position:relative;
+    max-height: 90vh; overflow-y:auto;
+  }
+
+  .card-form .punch{ display:flex; justify-content:space-between; padding: 14px 22px 0; }
+  .punch i{
+    width:12px; height:12px; border-radius:50%;
+    background: var(--green); display:block;
+    box-shadow: inset 0 2px 3px rgba(0,0,0,0.4);
+  }
+
+  .card-form-inner{ padding: 8px 26px 26px; }
+  .card-form h2{
+    font-family:'Fraunces', serif; font-weight:500; font-size:1.5rem; margin: 4px 0 20px;
+  }
+  .card-form p.lede{ font-size:0.86rem; color: rgba(33,29,22,0.6); margin:-12px 0 20px; }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-size:0.78rem; font-weight:600;
+    letter-spacing:0.02em; color: rgba(33,29,22,0.62); margin-bottom:6px;
+  }
+  .field input[type="text"], .field input[type="number"],
+  .field input[type="email"], .field input[type="password"]{
+    width:100%;
+    font-family:'Work Sans', sans-serif;
+    font-size:0.95rem;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background: rgba(255,255,255,0.5);
+    color: var(--ink);
+  }
+  .field input:focus{ border-color: var(--gold); background: #fff; }
+  .two-col{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+
+  .cover-picker{ display:flex; gap:14px; align-items:flex-start; margin-bottom:18px; }
+  .cover-preview{
+    width:78px; height:117px; border-radius:2px; overflow:hidden;
+    background: var(--paper-dim); flex-shrink:0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+  }
+  .cover-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .cover-preview .cover-placeholder span{ color: rgba(255,255,255,0.9); font-size:0.72rem; }
+
+  .cover-actions{ display:flex; flex-direction:column; gap:8px; padding-top:4px; }
+  .cover-actions .btn-ghost{
+    color: var(--ink); border-color: rgba(33,29,22,0.3);
+    padding:8px 14px; font-size:0.82rem;
+  }
+  .cover-actions .btn-ghost:hover{ border-color: var(--rust); color: var(--rust); }
+  .hint{ font-size:0.76rem; color: rgba(33,29,22,0.45); margin:2px 0 0; }
+
+  .form-actions{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:22px; padding-top:16px; border-top:1px dashed var(--line);
+  }
+  .form-actions .right{ display:flex; gap:10px; }
+  .form-actions .btn-ghost{ color: var(--ink); border-color: rgba(33,29,22,0.3); }
+  .form-actions .btn-ghost:hover{ border-color: var(--gold); color: #8a5f1f; }
+  .delete-link{
+    background:none; border:none; cursor:pointer; color: var(--rust);
+    font-size:0.85rem; font-family:'Work Sans', sans-serif; padding:4px;
+  }
+  .delete-link:hover{ text-decoration:underline; }
+
+  .status{ text-align:center; padding:60px 0; color: rgba(243,236,218,0.5); font-size:0.9rem; }
+  .error-text{ color: var(--rust); font-size:0.82rem; margin: -6px 0 14px; min-height:1em; }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform: translateX(-50%);
+    background: var(--paper); color: var(--ink);
+    padding:10px 18px; border-radius:3px; font-size:0.85rem;
+    box-shadow: var(--shadow); z-index:60;
+    opacity:0; pointer-events:none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(-4px); }
+
+  .login-screen{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="login-screen">
+    <div class="status">carregando…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, setDoc, deleteDoc, query, where, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  // ======================================================================
+  // COLE AQUI a configuração do seu app web do Firebase
+  // (Console do Firebase > Configurações do projeto > seus apps > SDK setup)
+  // ======================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBzpKvNR9hJ5NwKWt0bhjAeaxzz636YdBU",
+    authDomain: "my-book-list-9281d.firebaseapp.com",
+    projectId: "my-book-list-9281d",
+    storageBucket: "my-book-list-9281d.firebasestorage.app"",
+    messagingSenderId: "684061072184",
+    appId: "1:684061072184:web:d2d32670478788bae23fcd"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const appRoot = document.getElementById('app');
+  const toastEl = document.getElementById('toast');
+
+  let books = [];
+  let currentUser = null;
+  let unsubscribeBooks = null;
+  let editingId = null;
+  let pendingCoverData = null;
+
+  const PLACEHOLDER_PALETTE = [
+    ['#5c7a63','#3f5745'],
+    ['#b5673a','#8a4c29'],
+    ['#4a6b83','#324a5c'],
+    ['#a3823f','#7a5f2c'],
+    ['#7a5c7a','#57405a'],
+    ['#6b7a3f','#4d582c'],
+  ];
+
+  function hashStr(s){
+    let h = 0;
+    for(let i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; }
+    return Math.abs(h);
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(()=> toastEl.classList.remove('show'), 1800);
+  }
+
+  function uid(){
+    return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- auth screens ----------
+
+  function renderLogin(){
+    appRoot.innerHTML = `
+      <div class="login-screen">
+        <div class="card-form" style="max-width:360px;">
+          <div class="punch"><i></i><i></i></div>
+          <div class="card-form-inner">
+            <h2>Entrar na estante</h2>
+            <p class="lede">Use o usuário criado no console do Firebase.</p>
+            <div class="field">
+              <label for="login-email">E-mail</label>
+              <input type="email" id="login-email" autocomplete="username">
+            </div>
+            <div class="field">
+              <label for="login-password">Senha</label>
+              <input type="password" id="login-password" autocomplete="current-password">
+            </div>
+            <p class="error-text" id="login-error"></p>
+            <button class="btn btn-primary" id="btn-login" style="width:100%;">Entrar</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const doLogin = async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const errorEl = document.getElementById('login-error');
+      const btn = document.getElementById('btn-login');
+      errorEl.textContent = '';
+      if(!email || !password){
+        errorEl.textContent = 'Preencha e-mail e senha.';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Entrando…';
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+      }catch(err){
+        errorEl.textContent = 'Não foi possível entrar. Confira e-mail e senha.';
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    };
+
+    document.getElementById('btn-login').addEventListener('click', doLogin);
+    document.getElementById('login-password').addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') doLogin();
+    });
+  }
+
+  function renderShell(){
+    appRoot.innerHTML = `
+      <div class="wrap">
+        <header>
+          <div class="title-block">
+            <h1>Estante</h1>
+            <p class="sub">Seus livros, onde você parou em cada um.</p>
+          </div>
+          <div class="header-actions">
+            <span class="user-email">${escapeHtml(currentUser.email || '')}</span>
+            <button class="btn-text" id="btn-logout">Sair</button>
+            <button class="btn btn-primary" id="btn-add">+ Adicionar livro</button>
+          </div>
+        </header>
+        <div id="content"><div class="status">carregando sua estante…</div></div>
+      </div>
+      <div id="modal-root"></div>
+    `;
+    document.getElementById('btn-add').addEventListener('click', openAddForm);
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      if(unsubscribeBooks) unsubscribeBooks();
+      await signOut(auth);
+    });
+  }
+
+  // ---------- firestore ----------
+
+  function startBooksListener(){
+    const q = query(collection(db, 'books'), where('ownerId', '==', currentUser.uid));
+    unsubscribeBooks = onSnapshot(q, (snap) => {
+      books = [];
+      snap.forEach(d => books.push(d.data()));
+      books.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+      renderBooks();
+    }, (err) => {
+      console.error('Falha ao sincronizar estante', err);
+      books = null;
+      renderBooks();
+    });
+  }
+
+  async function saveBook(book){
+    await setDoc(doc(db, 'books', book.id), book);
+  }
+
+  async function deleteBookStorage(id){
+    await deleteDoc(doc(db, 'books', id));
+  }
+
+  // ---------- rendering: books ----------
+
+  function coverInnerHTML(book){
+    if(book.cover){
+      return `<img src="${book.cover}" alt="Capa de ${escapeHtml(book.title)}">`;
+    }
+    const [c1,c2] = PLACEHOLDER_PALETTE[hashStr(book.title||'?') % PLACEHOLDER_PALETTE.length];
+    return `<div class="cover-placeholder" style="background:linear-gradient(155deg, ${c1}, ${c2})">
+      <span>${escapeHtml(book.title || 'Sem título')}</span>
+    </div>`;
+  }
+
+  function renderBooks(){
+    const contentEl = document.getElementById('content');
+    if(!contentEl) return;
+
+    if(books === null){
+      contentEl.innerHTML = `<div class="status">Não foi possível carregar sua estante agora. Recarregue a página.</div>`;
+      return;
+    }
+    if(!books.length){
+      contentEl.innerHTML = `
+        <div class="empty">
+          <svg width="90" height="70" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="60" width="82" height="6" rx="1" fill="#6b4a32"/>
+            <g stroke="#f3ecda" stroke-width="2" opacity="0.55">
+              <rect x="14" y="18" width="12" height="40" rx="1"/>
+              <rect x="30" y="24" width="12" height="34" rx="1"/>
+              <rect x="46" y="14" width="12" height="44" rx="1"/>
+              <rect x="64" y="22" width="12" height="36" rx="1"/>
+            </g>
+          </svg>
+          <h2>Sua estante está vazia</h2>
+          <p>Adicione o primeiro livro que você está lendo agora.</p>
+          <button class="btn btn-primary" id="btn-add-empty">+ Adicionar livro</button>
+        </div>
+      `;
+      document.getElementById('btn-add-empty').addEventListener('click', openAddForm);
+      return;
+    }
+
+    const cards = books.map(b => {
+      let ribbon = `<div class="ribbon">Cap. ${escapeHtml(b.chapter || '—')}`;
+      if(b.totalChapters && b.chapter && !isNaN(parseFloat(b.chapter))){
+        const pct = Math.min(100, Math.max(0, (parseFloat(b.chapter) / parseFloat(b.totalChapters)) * 100));
+        ribbon += `<div class="prog"><i style="width:${pct}%"></i></div>`;
+      }
+      ribbon += `</div>`;
+      return `
+        <button class="book-card" data-id="${b.id}" aria-label="Editar ${escapeHtml(b.title)}">
+          <div class="cover">
+            ${coverInnerHTML(b)}
+            ${b.chapter ? ribbon : ''}
+          </div>
+          <div class="book-title">${escapeHtml(b.title || 'Sem título')}</div>
+          <div class="book-chapter">${b.chapter ? 'parou no capítulo ' + escapeHtml(b.chapter) : 'ainda sem progresso'}</div>
+        </button>
+      `;
+    }).join('');
+
+    contentEl.innerHTML = `<div class="shelf-row">${cards}</div>`;
+    contentEl.querySelectorAll('.book-card').forEach(el => {
+      el.addEventListener('click', () => openEditForm(el.getAttribute('data-id')));
+    });
+  }
+
+  // ---------- form ----------
+
+  function resizeImage(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('image decode failed'));
+        img.onload = () => {
+          const maxW = 420;
+          const scale = Math.min(1, maxW / img.width);
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.72));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function closeModal(){
+    document.getElementById('modal-root').innerHTML = '';
+    editingId = null;
+    pendingCoverData = null;
+  }
+
+  function openAddForm(){
+    editingId = null;
+    pendingCoverData = null;
+    renderForm({ title:'', chapter:'', totalChapters:'', cover:null });
+  }
+
+  function openEditForm(id){
+    const book = books.find(b => b.id === id);
+    if(!book) return;
+    editingId = id;
+    pendingCoverData = book.cover || null;
+    renderForm(book);
+  }
+
+  function renderForm(book){
+    const modalRoot = document.getElementById('modal-root');
+    modalRoot.innerHTML = `
+      <div class="overlay" id="overlay">
+        <div class="card-form" role="dialog" aria-modal="true" aria-labelledby="form-title">
+          <div class="punch"><i></i><i></i></div>
+          <div class="card-form-inner">
+            <h2 id="form-title">${editingId ? 'Editar livro' : 'Novo livro'}</h2>
+
+            <div class="cover-picker">
+              <div class="cover-preview" id="cover-preview">
+                ${coverInnerHTML({title: book.title, cover: pendingCoverData})}
+              </div>
+              <div class="cover-actions">
+                <button class="btn-ghost btn" id="btn-pick-cover" type="button">Escolher imagem</button>
+                ${pendingCoverData ? '<button class="btn-ghost btn" id="btn-remove-cover" type="button">Remover imagem</button>' : ''}
+                <p class="hint">JPG ou PNG</p>
+                <input type="file" id="file-input" accept="image/*" style="display:none">
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-title">Título</label>
+              <input type="text" id="f-title" placeholder="Ex: Cem Anos de Solidão" value="${escapeHtml(book.title)}">
+            </div>
+
+            <div class="two-col">
+              <div class="field">
+                <label for="f-chapter">Parei no capítulo</label>
+                <input type="text" id="f-chapter" placeholder="Ex: 12" value="${escapeHtml(book.chapter || '')}">
+              </div>
+              <div class="field">
+                <label for="f-total">Total de capítulos <span style="font-weight:400;opacity:0.7">(opcional)</span></label>
+                <input type="number" id="f-total" min="1" placeholder="Ex: 30" value="${book.totalChapters || ''}">
+              </div>
+            </div>
+
+            <p class="error-text" id="form-error"></p>
+
+            <div class="form-actions">
+              <div class="left">
+                ${editingId ? '<button class="delete-link" id="btn-delete" type="button">Remover livro</button>' : '<span></span>'}
+              </div>
+              <div class="right">
+                <button class="btn btn-ghost" id="btn-cancel" type="button">Cancelar</button>
+                <button class="btn btn-primary" id="btn-save" type="button">Salvar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const overlay = document.getElementById('overlay');
+    overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+    document.getElementById('btn-cancel').addEventListener('click', closeModal);
+
+    document.getElementById('btn-pick-cover').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      try{
+        pendingCoverData = await resizeImage(file);
+        renderForm({
+          title: document.getElementById('f-title').value,
+          chapter: document.getElementById('f-chapter').value,
+          totalChapters: document.getElementById('f-total').value,
+          cover: pendingCoverData
+        });
+      }catch(err){
+        showToast('Não foi possível ler essa imagem.');
+      }
+    });
+
+    const removeBtn = document.getElementById('btn-remove-cover');
+    if(removeBtn){
+      removeBtn.addEventListener('click', () => {
+        pendingCoverData = null;
+        renderForm({
+          title: document.getElementById('f-title').value,
+          chapter: document.getElementById('f-chapter').value,
+          totalChapters: document.getElementById('f-total').value,
+          cover: null
+        });
+      });
+    }
+
+    const deleteBtn = document.getElementById('btn-delete');
+    if(deleteBtn){
+      deleteBtn.addEventListener('click', async () => {
+        if(!confirm('Remover este livro da estante?')) return;
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Removendo…';
+        try{
+          await deleteBookStorage(editingId);
+          closeModal();
+          showToast('Livro removido.');
+        }catch(err){
+          showToast('Não foi possível remover. Tente de novo.');
+          deleteBtn.disabled = false;
+          deleteBtn.textContent = 'Remover livro';
+        }
+      });
+    }
+
+    document.getElementById('btn-save').addEventListener('click', async () => {
+      const title = document.getElementById('f-title').value.trim();
+      const chapter = document.getElementById('f-chapter').value.trim();
+      const totalChapters = document.getElementById('f-total').value.trim();
+      const errorEl = document.getElementById('form-error');
+      errorEl.textContent = '';
+
+      if(!title){
+        errorEl.textContent = 'Dê um título ao livro antes de salvar.';
+        document.getElementById('f-title').focus();
+        return;
+      }
+
+      const saveBtn = document.getElementById('btn-save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Salvando…';
+
+      const bookObj = {
+        id: editingId || uid(),
+        ownerId: currentUser.uid,
+        title,
+        chapter,
+        totalChapters: totalChapters ? Number(totalChapters) : null,
+        cover: pendingCoverData,
+        updatedAt: Date.now()
+      };
+
+      try{
+        await saveBook(bookObj);
+        closeModal();
+        showToast('Estante atualizada.');
+      }catch(err){
+        console.error(err);
+        errorEl.textContent = 'Não foi possível salvar. Confira sua conexão e tente de novo.';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Salvar';
+      }
+    });
+  }
+
+  // ---------- auth state ----------
+
+  onAuthStateChanged(auth, (user) => {
+    if(unsubscribeBooks){ unsubscribeBooks(); unsubscribeBooks = null; }
+    if(user){
+      currentUser = user;
+      renderShell();
+      renderBooks();
+      startBooksListener();
+    }else{
+      currentUser = null;
+      books = [];
+      renderLogin();
+    }
+  });
+</script>
+
+</body>
+</html>
