@@ -432,8 +432,8 @@
       <div class="wrap">
         <header>
           <div class="title-block">
-            <h1>Estante</h1>
-            <p class="sub">Seus livros, onde você parou em cada um.</p>
+            <h1>Sua Estante</h1>
+            <p class="sub">Aqui você acha onde você parou na leitura.</p>
           </div>
           <div class="header-actions">
             <span class="user-email">${escapeHtml(currentUser.email || '')}</span>
@@ -611,7 +611,7 @@
 
             <div class="field">
               <label for="f-title">Título</label>
-              <input type="text" id="f-title" placeholder="Ex: Cem Anos de Solidão" value="${escapeHtml(book.title)}">
+              <input type="text" id="f-title" placeholder="Ex: Até as Princesas Soltam Pum" value="${escapeHtml(book.title)}">
             </div>
 
             <div class="two-col">
@@ -621,7 +621,7 @@
               </div>
               <div class="field">
                 <label for="f-total">Total de capítulos <span style="font-weight:400;opacity:0.7">(opcional)</span></label>
-                <input type="number" id="f-total" min="1" placeholder="Ex: 30" value="${book.totalChapters || ''}">
+                <input type="number" id="f-total" min="1" placeholder="Ex: 64" value="${book.totalChapters || ''}">
               </div>
             </div>
 
